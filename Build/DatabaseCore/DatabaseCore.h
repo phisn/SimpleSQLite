@@ -597,11 +597,11 @@ namespace Database
 				return false;
 			}
 
-			if (int result = sqlite3_step(statement); result != SQLITE_ROW)
+			if (int result = sqlite3_step(statement); result != SQLITE_DONE)
 			{
-				if (result == SQLITE_DONE)
+				if (result == SQLITE_ROW)
 				{
-					status = StatementStatus::Finished;
+					OnDatabaseCoreFailure("got row in databasecore statement execute<>");
 				}
 				else
 				{
@@ -611,7 +611,7 @@ namespace Database
 				return false;
 			}
 
-			StatementColumnTuple<Tuple>::Extract(tuple, statement);
+			status = StatementStatus::Finished;
 			return true;
 		}
 
@@ -623,6 +623,37 @@ namespace Database
 		bool can_step() const
 		{
 			return status == StatementStatus::Running;
+		}
+
+		template <typename T>
+		bool bind(int index, T& value)
+		{
+			if (status != StatementStatus::Ready)
+			{
+				OnDatabaseCoreFailure("tried to bind index value in databasecore statement at invalid status");
+				return false;
+			}
+
+			return ensureStatusCode(StatementColumn<T>::BindAs(value, index, statement)
+		}
+
+		template <typename... Args>
+		bool bind(Args&&... args)
+		{
+			std::tuple<Args...> tuple = std::make_tuple<Args...>(std::forward(args)...);
+			return bind(tuple);
+		}
+
+		template <typename... Args>
+		bool bind(std::tuple<Args...>& tuple)
+		{
+			if (status != StatementStatus::Ready)
+			{
+				OnDatabaseCoreFailure("tried to bind tuple in databasecore statement at invalid status");
+				return false;
+			}
+
+			return ensureStatusCode(StatementTupleColumn<std::tuple<Args...>>::Bind(tuple, statement);
 		}
 
 		StatementStatus get_status() const
