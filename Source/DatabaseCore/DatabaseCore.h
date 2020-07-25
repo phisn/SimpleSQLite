@@ -579,7 +579,8 @@ namespace Database
 		template <typename... Args>
 		SQLiteStatement(SQLiteDatabase* database, std::string query)
 			:
-			database(database)
+			database(database),
+			status(SQLiteStatementStatus::Ready)
 		{
 			ensureStatusCode(
 				sqlite3_prepare_v2(
