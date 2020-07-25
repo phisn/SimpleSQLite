@@ -640,11 +640,13 @@ namespace Database
 			switch (status)
 			{
 			case SQLiteStatementStatus::Failed:
-				OnDatabaseCoreFailure("tried to execute statement after failure");
+				if (OnDatabaseCoreFailure)
+					OnDatabaseCoreFailure("tried to execute statement after failure");
 
 				return false;
 			case SQLiteStatementStatus::Finished:
-				OnDatabaseCoreFailure("tried to execute statement after finish");
+				if (OnDatabaseCoreFailure)
+					OnDatabaseCoreFailure("tried to execute statement after finish");
 
 				return false;
 			}
@@ -653,7 +655,8 @@ namespace Database
 			{
 				if (result == SQLITE_ROW)
 				{
-					OnDatabaseCoreFailure("got row in databasecore statement execute<>");
+					if (OnDatabaseCoreFailure)
+						OnDatabaseCoreFailure("got row in databasecore statement execute<>");
 				}
 				else
 				{
@@ -683,7 +686,9 @@ namespace Database
 		{
 			if (status != SQLiteStatementStatus::Ready)
 			{
-				OnDatabaseCoreFailure("tried to bind index value in databasecore statement at invalid status");
+				if (OnDatabaseCoreFailure)
+					OnDatabaseCoreFailure("tried to bind index value in databasecore statement at invalid status");
+
 				return false;
 			}
 
@@ -702,7 +707,9 @@ namespace Database
 		{
 			if (status != SQLiteStatementStatus::Ready)
 			{
-				OnDatabaseCoreFailure("tried to bind tuple in databasecore statement at invalid status");
+				if (OnDatabaseCoreFailure)
+					OnDatabaseCoreFailure("tried to bind tuple in databasecore statement at invalid status");
+				
 				return false;
 			}
 
@@ -736,11 +743,13 @@ namespace Database
 			switch (status)
 			{
 			case SQLiteStatementStatus::Failed:
-				OnDatabaseCoreFailure("tried to step statement after failure");
+				if (OnDatabaseCoreFailure)
+					OnDatabaseCoreFailure("tried to step statement after failure");
 
 				return false;
 			case SQLiteStatementStatus::Finished:
-				OnDatabaseCoreFailure("tried to step statement after finish");
+				if (OnDatabaseCoreFailure)
+					OnDatabaseCoreFailure("tried to step statement after finish");
 
 				return false;
 			}
